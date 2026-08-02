@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulse | Mini Social Media</title>
+  <!-- Google Fonts & FontAwesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- TOP NAVBAR -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand" id="brand-logo">
+        <div class="brand-icon">
+          <i class="fa-solid fa-bolt"></i>
+        </div>
+        <span class="brand-name">Pulse<span class="brand-dot">.</span></span>
+      </div>
+
+      <!-- SEARCH BAR -->
+      <div class="nav-search">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="global-search-input" placeholder="Search posts, topics, or people..." autocomplete="off">
+        <button id="clear-search-btn" class="clear-search-btn hidden"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- ACTIVE USER SWITCHER & ACTIONS -->
+      <div class="nav-actions">
+        <div class="user-switcher-wrapper">
+          <span class="switcher-label">Acting as:</span>
+          <select id="user-switcher-select" class="user-switcher-select">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        
+        <button id="nav-create-post-btn" class="btn btn-primary btn-round">
+          <i class="fa-solid fa-feather-pointed"></i>
+          <span>Post</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP LAYOUT -->
+  <div class="app-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar left-sidebar">
+      <div class="sidebar-user-card" id="sidebar-current-user-card">
+        <div class="user-card-avatar-wrapper">
+          <img id="sidebar-user-avatar" src="" alt="User Avatar" class="user-avatar-img">
+        </div>
+        <div class="user-card-info">
+          <h4 id="sidebar-user-name" class="user-name">Loading...</h4>
+          <span id="sidebar-user-handle" class="user-handle">@loading</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-link active" data-view="feed" data-feed="for_you">
+          <i class="fa-solid fa-house"></i>
+          <span>For You</span>
+        </button>
+        <button class="nav-link" data-view="feed" data-feed="following">
+          <i class="fa-solid fa-user-group"></i>
+          <span>Following</span>
+        </button>
+        <button class="nav-link" id="nav-my-profile-btn">
+          <i class="fa-solid fa-circle-user"></i>
+          <span>My Profile</span>
+        </button>
+        <button class="nav-link" id="nav-create-user-btn">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>New Account</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="app-version">
+          <i class="fa-solid fa-database"></i> Express + SQLite
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER FEED / PROFILE CONTENT -->
+    <main class="main-content">
+
+      <!-- SEARCH RESULT BANNER -->
+      <div id="search-banner" class="search-banner hidden">
+        <span>Showing results for "<strong id="search-query-text"></strong>"</span>
+        <button id="reset-search-banner-btn" class="btn btn-sm btn-glass">Clear Search</button>
+      </div>
+
+      <!-- FEED VIEW -->
+      <section id="feed-view" class="view-section active">
+        <!-- FEED TABS -->
+        <div class="feed-tabs">
+          <button class="tab-btn active" data-feed-tab="for_you">For You</button>
+          <button class="tab-btn" data-feed-tab="following">Following</button>
+        </div>
+
+        <!-- POST COMPOSER CARD -->
+        <div class="composer-card">
+          <div class="composer-header">
+            <img id="composer-user-avatar" src="" alt="Avatar" class="user-avatar-img">
+            <textarea id="composer-text" placeholder="What's on your mind? Share an update..." rows="3"></textarea>
+          </div>
+          
+          <div id="composer-media-preview" class="composer-media-preview hidden">
+            <img id="preview-img-element" src="" alt="Media Preview">
+            <button id="remove-preview-btn" class="remove-preview-btn"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <div class="composer-footer">
+            <div class="composer-tools">
+              <label class="tool-btn" title="Upload Image File">
+                <i class="fa-regular fa-image"></i>
+                <input type="file" id="composer-file-input" accept="image/*" class="hidden">
+              </label>
+              <button id="composer-url-btn" class="tool-btn" title="Add Image URL">
+                <i class="fa-solid fa-link"></i>
+              </button>
+            </div>
+            <button id="publish-post-btn" class="btn btn-primary">
+              <span>Publish Post</span>
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </div>
+
+          <!-- OPTIONAL URL INPUT BAR -->
+          <div id="image-url-input-bar" class="image-url-input-bar hidden">
+            <input type="text" id="composer-url-input" placeholder="Paste image URL (e.g. https://...)" />
+            <button id="confirm-url-btn" class="btn btn-sm btn-secondary">Attach</button>
+          </div>
+        </div>
+
+        <!-- POSTS LIST CONTAINER -->
+        <div id="posts-container" class="posts-container">
+          <!-- Dynamic post cards rendered here -->
+          <div class="loading-spinner-wrapper">
+            <div class="spinner"></div>
+            <p>Loading posts...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROFILE VIEW -->
+      <section id="profile-view" class="view-section hidden">
+        <button id="back-to-feed-btn" class="btn btn-glass btn-back">
+          <i class="fa-solid fa-arrow-left"></i> Back to Feed
+        </button>
+
+        <div class="profile-card">
+          <!-- PROFILE COVER & AVATAR -->
+          <div class="profile-cover-wrapper">
+            <img id="profile-cover-img" src="" alt="Cover Image" class="profile-cover-img">
+            <div class="profile-avatar-overlay">
+              <img id="profile-avatar-img" src="" alt="Profile Avatar" class="profile-avatar-img">
+            </div>
+          </div>
+
+          <!-- PROFILE HEADER METADATA -->
+          <div class="profile-details-wrapper">
+            <div class="profile-action-row">
+              <div class="profile-titles">
+                <h2 id="profile-display-name" class="profile-display-name">User Name</h2>
+                <span id="profile-username" class="profile-username">@username</span>
+              </div>
+              <div class="profile-buttons" id="profile-buttons-container">
+                <!-- Dynamic Edit Profile or Follow button -->
+              </div>
+            </div>
+
+            <p id="profile-bio-text" class="profile-bio-text">User bio goes here...</p>
+
+            <div class="profile-meta-row">
+              <span><i class="fa-regular fa-calendar"></i> Joined <span id="profile-joined-date">Recently</span></span>
+            </div>
+
+            <!-- PROFILE STATS ROW -->
+            <div class="profile-stats-bar">
+              <div class="stat-item">
+                <span id="stat-posts-count" class="stat-value">0</span>
+                <span class="stat-label">Posts</span>
+              </div>
+              <div class="stat-item clickable" id="stat-followers-btn">
+                <span id="stat-followers-count" class="stat-value">0</span>
+                <span class="stat-label">Followers</span>
+              </div>
+              <div class="stat-item clickable" id="stat-following-btn">
+                <span id="stat-following-count" class="stat-value">0</span>
+                <span class="stat-label">Following</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROFILE POSTS SECTION -->
+        <h3 class="section-title"><i class="fa-solid fa-newspaper"></i> User Posts</h3>
+        <div id="profile-posts-container" class="posts-container">
+          <!-- Dynamic user posts -->
+        </div>
+      </section>
+    </main>
+
+    <!-- RIGHT SIDEBAR -->
+    <aside class="sidebar right-sidebar">
+      <div class="widget-card">
+        <h3 class="widget-title"><i class="fa-solid fa-user-plus"></i> Who to Follow</h3>
+        <div id="suggested-users-list" class="suggested-users-list">
+          <!-- Dynamically populated suggested users -->
+        </div>
+      </div>
+
+      <div class="widget-card">
+        <h3 class="widget-title"><i class="fa-solid fa-hashtag"></i> Trending Topics</h3>
+        <div class="trending-list">
+          <div class="trending-item" data-tag="webdev">
+            <span class="tag-name">#webdev</span>
+            <span class="tag-count">1.4k posts</span>
+          </div>
+          <div class="trending-item" data-tag="expressjs">
+            <span class="tag-name">#expressjs</span>
+            <span class="tag-count">890 posts</span>
+          </div>
+          <div class="trending-item" data-tag="sqlite">
+            <span class="tag-name">#sqlite</span>
+            <span class="tag-count">650 posts</span>
+          </div>
+          <div class="trending-item" data-tag="javascript">
+            <span class="tag-name">#javascript</span>
+            <span class="tag-count">2.1k posts</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- COMMENTS MODAL / DRAWER -->
+  <div id="comments-modal" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3><i class="fa-regular fa-comments"></i> Post Comments</h3>
+        <button class="modal-close-btn" id="close-comments-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="comments-post-summary" class="post-summary-box">
+          <!-- Post preview summary -->
+        </div>
+        
+        <div class="comments-list" id="comments-list-container">
+          <!-- Dynamic comments -->
+        </div>
+
+        <div class="comment-input-bar">
+          <img id="comment-user-avatar" src="" alt="Avatar" class="user-avatar-img avatar-sm">
+          <input type="text" id="new-comment-input" placeholder="Write a comment..." autocomplete="off">
+          <button id="submit-comment-btn" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT PROFILE MODAL -->
+  <div id="edit-profile-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-pen"></i> Edit Profile</h3>
+        <button class="modal-close-btn" id="close-edit-profile-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-profile-form">
+          <div class="form-group">
+            <label for="edit-display-name">Display Name</label>
+            <input type="text" id="edit-display-name" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-bio">Bio</label>
+            <textarea id="edit-bio" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="edit-avatar-url">Avatar Image URL</label>
+            <input type="text" id="edit-avatar-url">
+          </div>
+          <div class="form-group">
+            <label for="edit-cover-url">Cover Image URL</label>
+            <input type="text" id="edit-cover-url">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-glass" id="cancel-edit-profile-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE USER MODAL -->
+  <div id="create-user-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-plus"></i> Create New Account</h3>
+        <button class="modal-close-btn" id="close-create-user-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form id="create-user-form">
+          <div class="form-group">
+            <label for="new-username">Username (e.g. janesmith)</label>
+            <input type="text" id="new-username" placeholder="lowercase letters, numbers, underscores" required>
+          </div>
+          <div class="form-group">
+            <label for="new-display-name">Display Name</label>
+            <input type="text" id="new-display-name" placeholder="Jane Smith" required>
+          </div>
+          <div class="form-group">
+            <label for="new-bio">Bio (Optional)</label>
+            <textarea id="new-bio" placeholder="Tell us about yourself..." rows="2"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-glass" id="cancel-create-user-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLLOWERS / FOLLOWING LIST MODAL -->
+  <div id="users-list-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="users-list-modal-title">Users</h3>
+        <button class="modal-close-btn" id="close-users-list-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-users-container" class="modal-users-container">
+          <!-- List of users -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
